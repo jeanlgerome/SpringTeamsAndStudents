@@ -1,0 +1,111 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://thymeleaf.org">
+<head>
+    <title> Students List</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+</head>
+
+<body>
+<div style="padding-left: 40px; padding-top: 15px;">
+    <h4 th:text=" ' Группа № ' + ${teamNumber}"></h4>
+    <table class="table table-sm w-50 table-bordered" id="studentsTable">
+        <thead class="thead-light">
+        <tr>
+            <th scope="col">Дата принятия</th>
+            <th scope="col">ФИО студента</th>
+            <th scope="col">Действия</th>
+        </tr>
+        </thead>
+        <tbody id="studentsTableBody">
+
+        </tbody>
+    </table>
+    <div>
+        <form method="post" action="">
+            <div class="form-group col-xl-2 col-lg-1">
+                <input type="text" class="form-control mb-50" id="fio" placeholder="ФИО"/>
+            </div>
+            <div>
+                <button type="submit" class="btn btn-secondary mt-50">Принять нового студента</button>
+            </div>
+        </form>
+    </div>
+    <div style="padding-top: 40px;">
+        <button type="button" onclick="location.href='/teamsPage/1'"  class="btn btn-secondary ">Вернуться к списку групп </button>
+    </div>
+</div>
+
+<script src="http://code.jquery.com/jquery-1.10.2.min.js" type="text/javascript"></script>
+<script type="text/javascript" th:inline="javascript">
+    /*<![CDATA[*/
+    let teamNumber = /*[[${teamNumber}]]*/ ;
+    /*]]>*/
+    $(document).ready(function () {
+        showStudents();
+    })
+
+    $(function () {
+        $('form').on('submit', function (e) {
+            e.preventDefault();
+            addStudent();
+            document.getElementById('fio').value = ''
+        });
+    });
+
+    function addStudent() {
+        $.ajax({
+            url: '/addStudent/',
+            type: 'POST',
+            data: {
+                StudentFio: $("#fio").val(),
+                teamNumber: teamNumber
+            },
+            success: function () {
+                showStudents();
+            },
+            error: function () {
+                showStudents();
+            }
+        });
+    }
+
+    function deleteStudent(id) {
+        $.ajax({
+            url: '/deleteStudent/',
+            type: 'POST',
+            data: {
+                StudentId: id,
+                teamNumber: teamNumber
+            },
+            success: function () {
+                showStudents();
+            },
+            error: function () {
+                showStudents();
+            }
+        });
+    }
+
+    function showStudents() {
+        var tableRef = document.getElementById('studentsTable').getElementsByTagName('tbody')[0];
+        $("#studentsTableBody").empty();
+        $.get('/getStudentsList/' + teamNumber, function (data) {
+
+            for (var i = 0; i < data.length; i++) {
+                var newRow = tableRef.insertRow();
+                var entryDateCell = newRow.insertCell(0);
+                var fioCell = newRow.insertCell(1);
+                var editNameCell = newRow.insertCell(2);
+                editNameCell.innerHTML = '<a href="#" onclick="event.preventDefault(), deleteStudent(' + data[i].id + ')"> delete </a>';
+                var newEntryDate = document.createTextNode(data[i].entryDate);
+                var newFio = document.createTextNode(data[i].fio);
+                entryDateCell.appendChild(newEntryDate);
+                fioCell.appendChild(newFio);
+            }
+        })
+    }
+</script>
+</body>
+</html>
