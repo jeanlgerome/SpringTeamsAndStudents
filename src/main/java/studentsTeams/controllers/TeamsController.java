@@ -32,8 +32,8 @@ public class TeamsController {
             return "404";
         }
         model.put("teams", teamsPage.getContent());
-        model.put("page", page);
         model.put("previousPage", page - 1);
+        model.put("page", page);
         model.put("nextPage", page + 1);
         model.put("lastPage", teamsPage.getTotalPages());
         return "teamsPage";
