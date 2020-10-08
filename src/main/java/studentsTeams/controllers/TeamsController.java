@@ -18,8 +18,8 @@ import java.util.Map;
 @Controller
 public class TeamsController {
 
-    @Autowired
-    private TeamRepo teamRepo;
+    private static final int PAGE_SIZE = 10;
+
     @Autowired
     private TeamService teamService;
 
@@ -29,17 +29,16 @@ public class TeamsController {
         if (page < 1) {
             return "404";
         }
-        Pageable NPageWithTwoElements = PageRequest.of(page - 1, 10);
-        Page<Team> teams = teamRepo.findAll(NPageWithTwoElements);
+        Page<Team> teamsPage = teamService.getPageOfTeams(page, PAGE_SIZE);
 
-        if (page > teams.getTotalPages()) {
+        if (page > teamsPage.getTotalPages()) {
             return "404";
         }
-        model.put("teams", teams.getContent());
+        model.put("teams", teamsPage.getContent());
         model.put("page", page);
         model.put("previousPage", page - 1);
         model.put("nextPage", page + 1);
-        model.put("lastPage", teams.getTotalPages());
+        model.put("lastPage", teamsPage.getTotalPages());
         return "teamsPage";
     }
 
